@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta property="og:title" content="My Music talk">
+    <meta property="og:description" content="인생노래를 추천해주세요. 노래를 공유하고 새로운 노래를 추천받아요:)">
+    <meta property="og:image" content="images/music.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Boards</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/46d5bee7ca.js" crossorigin="anonymous"></script>
+
+    <style>
+        *{
+            margin: 0 auto;
+            padding: 0;
+            list-style-type: none;
+        }
+        .wrap{
+            width: 80%;
+            margin: 0 auto ;
+        }
+        .header{
+            margin: 0 auto;
+            width: 100%;
+            height: 30%;
+        }
+        .header h2{
+            font-size: 40px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .header p{
+            font-size: 20px;
+            text-align: center;
+        }
+        .add-icon{
+            height: 30px;
+            position:relative;
+        }
+        .add-icon i{
+            font-size: 35px;
+            position: absolute;
+            right: 10px;
+        }
+        .boards-list{
+
+            border-radius: 30px;
+            margin-top: 40px;
+            padding:30px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+        .boards{
+            margin: 10px;
+        }
+        .board{
+            position: relative;
+            height: 40px;
+            padding: 20px;
+            }
+        .board:hover{
+            border-radius: 6px;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+        }
+        .metadata{
+            display:flex;
+            flex-direction: row;
+        }
+        .metadata .title{
+            position: absolute;
+            left: 7px;
+            font-size: 25px;
+            line-height: 40px;
+        }
+        .metadata .board-username{
+            position: absolute;
+            right: 7px;
+        }
+        .created-date{
+            position: absolute;
+            right:7px;
+            bottom:10px;
+            color: #888;
+            font-size: 14px;
+        }
+        .write-post{
+            width: 90%;
+            margin: 0 auto;
+            display: none;
+        }
+        .write-post textarea{
+            width: 100%;
+            height: 150px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            resize: none;
+            font-size: 18px ;
+        }
+        .write-post .info{
+            margin-bottom : 10px;
+            margin-top: 10px;
+            height: 30px;
+            display: flex;
+            align-content: space-between;
+            align-items: center;
+
+        }
+        .write-post .info input{
+            width: 30%;
+            line-height: 20px;
+            font-size: 18px ;
+            border: 1px solid darkgray;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        .post-button{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .post-button button{
+            margin: 10px;
+            width: 50%;
+            height: 35px;
+            border: 1px solid gray;
+            border-radius: 10px;
+            background: antiquewhite;
+            transition-duration: 0.5s;
+        }
+        .post-button button:hover{
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+        }
+    </style>
+    <script>
+        function isValidContents(contents,title,username){
+            if(contents =='' || title =='' || username == ''  ) {
+                alert('모든 내용을 입력해주세요');
+                return false;
+            }
+            return true;
+        }
+        function writeBoard(){
+            let contents = $('#contents').val();
+            let title = $('#title').val();
+            let username = $('#username').val();
+
+            if(isValidContents(contents,title, username) == false){
+                return;
+            }
+
+
+            let data = {'title': title, 'username' : username, 'contents' : contents }
+
+            $.ajax({
+                type: "POST",
+                url:"/api/boards",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(response){
+                    alert('메시지가 성공적으로 작성되었습니다.');
+                    window.location.reload();
+                }
+
+            })
+        }
+        function movetodetail(id){
+            console.log(id);
+            localStorage.setItem('id',id)
+            document.location.href ='./details.html';
+
+        }
+        $(document).ready(function(){
+            getBoard()
+        })
+        function writeToggle(){
+            if($('#write-post').css("display") =="none"){
+                $('#write-post').show()
+            }else{
+                $('#write-post').hide()
+            }
+        }
+        function getBoard(){
+            $('#boards').empty()
+
+            $.ajax({
+                type: 'GET',
+                url: 'api/boards',
+                success: function(response){
+
+                    for(let i = 0 ; i <response.length ; i++){
+                        let board = response[i];
+                        let id = board.id;
+                        let username = board.username;
+                        let title = board.title;
+                        let createdAt = board.modifiedAt;
+
+                        let createdate =  createdAt.split('T')[0]
+                        let createdtime = createdAt.split('T')[1].split('.')[0]
+
+                        createdAt = createdate + "  " +createdtime
+
+                        let tempHtml = `<li class="board" onclick="movetodetail(${id})">
+                            <div class="metadata">
+                            <div class="title" id="${id}-title">
+                                 🎸 ${title}
+                            </div>
+                                <div class="board-username" id ="board-${id}-username">
+                                    ${username}
+                                </div>
+                            </div>
+                                <div class="created-date" id = "${id}-created-date">
+                                    ${createdAt}
+                                </div>
+                            </li>`
+
+                        $('#boards').append(tempHtml);
+
+
+                    }
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+<div class=wrap>
+    <div class="header">
+        <h2>Music box🎧</h2>
+        <p>
+            당신의 인생노래를 추천해주세요💓
+        </p>
+    </div>
+    <div class="add" onclick="writeToggle()">
+        <div class="add-icon">
+            <i class="fa-solid fa-square-plus"></i>
+        </div>
+    </div>
+    <div class="write-post" id="write-post">
+        <div class="info">
+            <label for="title">노래 제목</label>
+            <input type="text" id="title" name ="title" required minlength ="1" >
+            <label for="username">작성자</label>
+            <input type="text" id="username" name ="username" required minlength ="1" >
+        </div>
+        <textarea id="contents" row="10" ></textarea>
+        <div class="post-button" onclick="writeBoard()">
+            <button>인생노래 등록하기🎶</button>
+        </div>
+    </div>
+    <div class="boards-list">
+        <ul class="boards" id ="boards">
+            <li class="board">
+                <div class="metadata">
+                    <div class="title">
+                        🎸Music is my life - by someone
+                    </div>
+                    <div class="board-username">
+                        anonymous
+                    </div>
+                </div>
+                <div class="created-date">
+                    April 10, 2022
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

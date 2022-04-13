@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Boards</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/46d5bee7ca.js" crossorigin="anonymous"></script>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+
+        }
+        .detail-wrap{
+            display: block;
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .content-box{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin-top: 100px;
+            height: 400px;
+            width: 100%;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+        .content-box h2{
+            font-size: 40px;
+            padding: 30px 20px;
+        }
+        .edit-title{
+            font-size: 40px;
+            padding: 30px 20px;
+        }
+        .edit-title input{
+            font-size: 40px;
+        }
+
+        .back-btn i{
+            font-size: 30px;
+            position: absolute;
+            top: -40px;
+            left: 10px;
+            transition-duration: 0.3s;
+        }
+        .back-btn i:hover{
+            font-size:32px;
+        }
+        .edit-btn i{
+            font-size: 30px;
+            position: absolute;
+            top: -40px;
+            right: 10px;
+            transition-duration: 0.3s;
+        }
+        .edit-btn i:hover{
+            font-size: 32px;
+        }
+        .delete-btn{
+            font-size: 30px;
+            position: absolute;
+            top: -40px;
+            right: 60px;
+            transition-duration: 0.3s;
+        }
+        .delete-btn i:hover{
+            font-size: 32px;
+        }
+        .con-2{
+            width:80%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            color: gray;
+        }
+        .con-2 .username{
+
+        }
+        .con-2 .date{
+
+        }
+        .content-box .content{
+            width: 80%;
+            padding: 10px;
+            margin-top: 30px ;
+            font-size: 19px ;
+            text-align: left;
+        }
+
+        .comment-box{
+            position: relative;
+            margin-top: 50px;
+            display: block;
+        }
+
+        .comment{
+            padding: 10px;
+            height: 80px;
+            position: relative;
+            display: block;
+        }
+        .comment-edit{
+            padding: 10px;
+            height: 80px;
+            position: relative;
+            display: none;
+        }
+        .comment:hover{
+            border: 1px solid coral;
+            border-radius: 5px;
+        }
+        .com-username{
+            font-size: 20px;
+            color: coral;
+
+        }
+        .com-text-input{
+            width: 100%;
+            height: 35px;
+            font-size:17px;
+        }
+        .com-date{
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            font-size: 13px;
+        }
+        .detail-edit-wrap{
+            display: none;
+            width: 80%;
+            margin: 0 auto;
+        }
+    .edit-contents{
+        width: 80%;
+        height: 150px;
+        border: 1px solid darkgray;
+        border-radius: 10px;
+        resize: none;
+        font-size: 18px ;
+        margin-top: 30px;
+        padding: 10px;
+    }
+    .send-edit{
+        width: 50%;
+        height: 30px;
+        margin: 10px;
+        border-radius: 10px;
+        border: none;
+        background: antiquewhite;
+        transition-duration: 0.5s;
+    }
+    .send-edit:hover{
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+        font-weight: bold;
+    }
+    #btn-space{
+        width: 100%;
+        text-align: center;
+    }
+    .write-comment{
+        position: relative;
+        height: 40px;
+    }
+    .write-comment i{
+        position: absolute;
+        right: 2%;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 35px;
+        transition-duration: 0.3s;
+    }
+    .write-comment i:hover{
+        font-size: 40px;
+    }
+    .write-comment-text{
+        width: 90%;
+        height: 30px;
+        resize: none;
+        border-top: none;
+        border-right: none;
+        border-left: none;
+        font-size: 17px;
+        line-height: 20px;
+
+
+    }
+    .save-delete-icons{
+
+    }
+    .save-delete-icons i{
+        font-size: 19px;
+        transition-duration: 0.3s;
+        margin-left:5px;
+        margin-right: 5px;
+    }
+    .save-delete-icons i:hover{
+        font-size: 21px;
+    }
+    .row{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    </style>
+    <script>
+        let id
+        if(localStorage.getItem('id')){
+            id = localStorage.getItem('id')
+        }
+        function isValidContents(contents){
+            if(contents =='') {
+                alert('내용을 입력해주세요');
+                return false;
+            }
+            return true;
+        }
+        function showedit(){
+         $('#detail-wrap').hide();
+         $('#detail-edit-wrap').show();
+        }
+        function hideedit(){
+            $('#detail-wrap').show();
+            $('#detail-edit-wrap').hide();
+        }
+        function showcomment(id){
+            $(`#${id}-comment`).show();
+            $(`#${id}-comment-edit`).hide();
+        }
+        function hidecomment(id){
+            console.log(id)
+
+            $(`#${id}-comment`).hide();
+            $(`#${id}-comment-edit`).show();
+        }
+        $(document).ready(function(){
+            getContentsById(id)
+            postComments()
+        })
+        function getContentsById(id){
+            $.ajax({
+                type:'GET',
+                url: `api/boards/${id}`,
+                success: function(response){
+
+                    let data = response;
+                    let id = data.id;
+                    let username = data.username;
+                    let title = data.title;
+                    let contents = data.contents;
+                    let createdAt = data.modifiedAt;
+
+                    let createdate =  createdAt.split('T')[0]
+                    let createdtime = createdAt.split('T')[1].split('.')[0]
+
+                    createdAt = createdate + "  " +createdtime
+
+
+
+                    $('#detail-title').empty();
+                    $('#detail-title').html(title);
+                    $('input#title').attr('value',title)
+                    $('#un').html(username);
+                    $('#date').html(createdAt);
+                    $('#detail-content').html(contents);
+                    $('input#username').attr('value',username);
+                    $('textarea#contents').html(contents);
+                    $('#delete-btn').attr('onclick',`deleteContent(${id})`);
+                    $('#edit-date').html(createdAt);
+
+
+                   let temp=  `<button class="send-edit" onclick=submitEdit(${id})> 수정하기 </button>`
+                    $('#btn-space').append(temp);
+                }
+            })
+        }
+        function submitEdit(id){
+            let title = $('input#title').val();
+            let username = $('input#username').val();
+            let contents = $('textarea#contents').val();
+
+            if(!isValidContents(contents) || !isValidContents(username)|| !isValidContents(title)){
+
+                return ;
+            }
+            let data = {'title': title, 'username' : username, 'contents' : contents }
+
+            $.ajax({
+                type: "PUT",
+                url:`/api/boards/${id}`,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success:function (response){
+                    alert('수정이 완료 되었습니다.');
+                    hideedit();
+                    window.location.reload();
+
+                }
+            })
+        }
+        function deleteContent(id){
+            $.ajax({
+                type:"DELETE",
+                url: `/api/boards/${id}`,
+                success:function(response){
+                    alert('삭제가 완료되었습니다!');
+                    deleteAllCommentsBycontents(id);
+                    window.location.href='/';
+            }
+            })
+        }
+        //-----------comment-----------------
+        function getRandomName(){
+            let result = '';
+            let characters ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+            let characterLength = characters.length;
+            for(let i = 0; i< 10; i++){
+                let number = Math.random() *characterLength;
+                let index = Math.floor(number);
+                result += characters.charAt(index);
+            }
+            return result;
+
+        }
+        function writeComment(){
+            let contents = $('#write-comment-text').val();
+            let userName = getRandomName();
+            if(isValidContents(contents) == false){
+                return;
+            }
+            let contentId = id
+            let data={'username': userName, 'contents': contents, 'contentId': contentId}
+
+            $.ajax({
+                type:'POST',
+                url:'/api/comments',
+                contentType: "application/json",
+                data:JSON.stringify(data),
+                success: function (response){
+                    alert('댓글이 작성되었습니다.');
+                    window.location.reload();
+                }
+
+            })
+        }
+        function postComments() {
+            let contentId = id
+
+            $.ajax({
+                type: 'GET',
+                url: `/api/comments/${contentId}`,
+                success: function (response) {
+                    console.log("success")
+                    if (response == null ){
+                        return ;
+                    }
+                    for( i =0 ; i< response.length; i++){
+
+                        let data = response[i];
+                        let commentId = data.id;
+                        let content = data.contents;
+                        let username = data.username;
+                        let createdAt = data.modifiedAt;
+
+                        let createdate =  createdAt.split('T')[0]
+                        let createdtime = createdAt.split('T')[1].split('.')[0]
+
+                        createdAt = createdate + "  " +createdtime
+
+                        let html_temp=`<div class="${commentId}-comments comments">
+                <div class="comment" id ="${commentId}-comment" onclick="hidecomment(${commentId})">
+                    <div class="com-username"> ${username} </div>
+                    <div class = "com-text">${content}</div>
+                    <div class="com-date">${createdAt}</div>
+                </div>
+                <div class="comment-edit" id ="${commentId}-comment-edit">
+                    <div class="row">
+                        <div class="com-username" id="com-username"> ${username} </div>
+                        <div class="save-delete-icons">
+                            <i class="fa-regular fa-circle-check" onclick="editComments(${commentId})"></i>
+                            <i class="fa-solid fa-trash-can" onclick="deleteComments(${commentId})"></i>
+                        </div>
+                    </div>
+                    <input type="text" class = "com-text-input" id="com-text-input" value="${content}"/>
+                    <div class="com-date" id="com-date">${createdAt}</div>
+                </div>
+            </div>`
+                        $('#comment-box').append(html_temp);
+                    }
+
+                }
+
+            })
+        }
+        function editComments(commentId){
+            let contentId = id ;
+            let content = $('#com-text-input').val().trim();
+            let username = $('#com-username').html().trim();
+            console.log(contentId, content, username);
+
+            if(isValidContents(content)== false){
+                return ;
+            }
+            let data={'username': username, 'contents': content, 'contentId': contentId}
+
+            $.ajax({
+                type:"PUT",
+                url:`/api/comments/${commentId}`,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success:function (response){
+                    alert('수정이 완료 되었습니다.');
+                    hidecomment(id);
+                    window.location.reload();
+
+                }
+            })
+
+        }
+        function deleteComments(commentId){
+            $.ajax({
+                type:"DELETE",
+                url: `/api/comments/${commentId}`,
+                success:function(response){
+                    alert('댓글 삭제가 완료되었습니다!');
+                    window.location.reload();
+                }
+            })
+        }
+        function deleteAllCommentsBycontents(contentId){
+            $.ajax({
+                type:"DELETE",
+                url: `/api/comments/deleteAll/${contentId}`,
+                success:function (response){
+                    console.log('컨텐츠안 모든 댓글 삭제')
+                }
+            })
+        }
+        function onclick_back(){
+            history.back();
+            window.location.reload();
+        }
+    </script>
+</head>
+<body>
+    <div class="detail-wrap" id="detail-wrap">
+        <div class="content-box">
+            <div class="back-btn" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></div>
+            <div class="edit-btn" onclick="showedit()"><i class="fa-solid fa-pen-to-square"></i></div>
+            <h2>🎸 <span id="detail-title"></span></h2>
+            <div class="con-2">
+                <div class="username">글쓴이 : <span id="un">${username}</span> </div>
+                <div class="date">작성 날짜: <span id="date">${createdAt}</span> </div>
+            </div>
+            <div class="content" id="detail-content">
+                ${contents}
+            </div>
+
+        </div>
+        <div class="comment-box" id="comment-box">
+            <div class="write-comment">
+                <textarea class="write-comment-text" id="write-comment-text" rows="2" placeholder="댓글을 작성해주세요."></textarea>
+                <i class="fa-regular fa-comment-dots" onclick="writeComment()"></i>
+            </div>
+        </div>
+    </div>
+    <div class="detail-edit-wrap" id="detail-edit-wrap" >
+        <div class="content-box">
+            <div class="back-btn" onclick="onclick_back()"><i class="fa-solid fa-arrow-left"></i></div>
+            <div class="delete-btn" id="delete-btn" ><i class="fa-solid fa-trash-can"></i></div>
+            <div class="edit-btn" onclick="hideedit()"><i class="fa-solid fa-pen-to-square"></i></div>
+           <div class="edit-title">
+            <label for="title">노래 제목 : </label>
+            <input type="text" id="title" name ="title" required minlength ="1" >
+           </div>
+            <div class="con-2">
+                <div class="username">
+                    <label for="username">글쓴이 : </label>
+                    <input type="text" id="username" name ="username" required minlength ="1" >
+                </div>
+                <div class="date">작성 날짜:<span id ="edit-date">4-11-2022</span> </div>
+            </div>
+            <textarea id="contents" class="edit-contents" row="10">
+                내용이 여기에 들어갑니다리
+            </textarea>
+            <div id="btn-space">
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
